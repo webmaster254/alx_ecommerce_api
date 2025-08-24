@@ -1,0 +1,45 @@
+<!-- templates/admin/products_overview.html -->
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Products Overview</h2>
+    <div class="results">
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" 
+                             style="max-height: 50px; max-width: 50px; border-radius: 4px;">
+                        {% else %}
+                        No Image
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'admin:products_product_change' product.id %}">{{ product.name }}</a></td>
+                    <td>${{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+<!-- users/templates/admin/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Ecommerce API{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Admin Dashboard</h1>
+        <span class="badge bg-primary">Admin View</span>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2 class="card-text">{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Users</h5>
+                    <h2 class="card-text">{{ active_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">New Today</h5>
+                    <h2 class="card-text">{{ new_users_today }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Staff Users</h5>
+                    <h2 class="card-text">{{ staff_users }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Roles Chart -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Users by Role</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for role in user_roles %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ role.role }}
+                            <span class="badge bg-primary rounded-pill">{{ role.count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Activities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for activity in recent_activities %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ activity.user.email }}</h6>
+                                <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                            </div>
+                            <p class="mb-1">
+                                <span class="badge bg-{% if activity.action == 'login' %}success{% elif activity.action == 'logout' %}info{% elif activity.action == 'registration' %}primary{% else %}warning{% endif %}">
+                                    {{ activity.action }}
+                                </span>
+                                from {{ activity.ip_address }}
+                            </p>
+                            <small class="text-muted">User Agent: {{ activity.user_agent|truncatechars:50 }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="text-muted mb-0">No recent activities</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group">
+                        <a href="{% url 'user-list-template' %}" class="btn btn-primary">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="/admin/" class="btn btn-secondary">
+                            <i class="fas fa-cog me-2"></i>Django Admin
+                        </a>
+                        <a href="{% url 'api-docs' %}" class="btn btn-info">
+                            <i class="fas fa-book me-2"></i>API Documentation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

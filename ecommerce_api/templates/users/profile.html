@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Ecommerce API{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">User Profile</h3>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture }}" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-3x text-secondary"></i>
+                        </div>
+                        {% endif %}
+                        <h5 class="mt-3">{{ user.email }}</h5>
+                        <span class="badge bg-{% if user.role == 'ADMIN' %}danger{% elif user.role == 'STAFF' %}warning{% else %}primary{% endif %}">
+                            {{ user.get_role_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                                    <small class="form-text text-muted">Email cannot be changed</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" name="phone_number" value="{{ user.phone_number|default:'' }}" 
+                                           placeholder="+1234567890">
+                                    {% if user.phone_verified %}
+                                    <small class="text-success">✓ Phone verified</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-select" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="M" {% if user.gender == 'M' %}selected{% endif %}>Male</option>
+                                        <option value="F" {% if user.gender == 'F' %}selected{% endif %}>Female</option>
+                                        <option value="O" {% if user.gender == 'O' %}selected{% endif %}>Other</option>
+                                        <option value="N" {% if user.gender == 'N' %}selected{% endif %}>Prefer not to say</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d' }}">
+                                    {% if user.date_of_birth %}
+                                    <small class="form-text text-muted">Age: {{ user.date_of_birth|timesince }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Profile Picture URL</label>
+                                <input type="url" class="form-control" name="profile_picture" value="{{ user.profile_picture|default:'' }}" 
+                                       placeholder="https://example.com/image.jpg">
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" name="accepts_marketing" id="accepts_marketing" {% if user.accepts_marketing %}checked{% endif %}>
+                                <label class="form-check-label" for="accepts_marketing">Receive marketing emails</label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Account Information</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">Member since: {{ user.date_joined|date:"M d, Y" }}</li>
+                            <li class="list-group-item">Last login: {{ user.last_login|date:"M d, Y H:i"|default:"Never" }}</li>
+                            <li class="list-group-item">Status: {% if user.is_active %}Active{% else %}Inactive{% endif %}</li>
+                            <li class="list-group-item">Loyalty Tier: {{ user.loyalty_tier|default:"Standard" }}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>Security & Verification</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                Email: {% if user.email_verified %}<span class="text-success">✓ Verified</span>{% else %}
+                                <span class="text-danger">✗ Not Verified</span> 
+                                <a href="#" class="btn btn-sm btn-outline-primary ms-2">Verify</a>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                Phone: {% if user.phone_verified %}<span class="text-success">✓ Verified</span>{% else %}
+                                <span class="text-danger">✗ Not Verified</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary ms-2">Verify</a>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <a href="#" class="btn btn-sm btn-outline-warning">Change Password</a>
+                                <a href="#" class="btn btn-sm btn-outline-info">Two-Factor Authentication</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

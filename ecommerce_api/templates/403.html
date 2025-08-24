@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Denied - Ecommerce API{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="error-container">
+                <div class="error-icon">
+                    <i class="fas fa-ban fa-5x text-danger"></i>
+                </div>
+                <h1 class="display-1 fw-bold text-muted">403</h1>
+                <h2 class="mb-4">Access Denied</h2>
+                <p class="lead mb-4">You don't have permission to access this page.</p>
+                <p class="text-muted mb-4">Please check your credentials or contact the administrator.</p>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{% url 'home' %}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </a>
+                </div>
+                
+                {% if debug %}
+                <div class="mt-5 p-3 bg-light rounded">
+                    <small class="text-muted">
+                        <strong>Error:</strong> Permission Denied<br>
+                        <strong>Debug Mode:</strong> On
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-container {
+    padding: 2rem;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.error-icon {
+    margin-bottom: 2rem;
+}
+
+.display-1 {
+    font-size: 6rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}

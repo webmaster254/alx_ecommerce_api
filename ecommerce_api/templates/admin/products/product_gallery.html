@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Gallery Admin</title>
+    <style>
+        /* Custom Admin CSS */
+        :root {
+            --primary: #4B6CB7;
+            --secondary: #182848;
+            --accent: #FF6B6B;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        /* Header styling */
+        #header {
+            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            height: 60px;
+        }
+
+        #branding h1 {
+            color: white;
+            font-weight: 700;
+        }
+
+        .breadcrumbs {
+            background: #e9ecef !important;
+            color: var(--dark) !important;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary) !important;
+        }
+
+        /* Dashboard cards */
+        .dashboard-card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            background: white;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-card .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .dashboard-card .card-body {
+            padding: 20px;
+        }
+
+        /* Product gallery */
+        .product-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .product-price {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #e0f7ea;
+            color: var(--success);
+        }
+
+        .status-draft {
+            background-color: #fff3cd;
+            color: var(--warning);
+        }
+
+        .status-discontinued {
+            background-color: #f8d7da;
+            color: var(--danger);
+        }
+
+        /* Button styling */
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        /* Custom navigation */
+        .custom-nav {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-nav h2 {
+            margin-top: 0;
+            color: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .nav-icons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-icon {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-icon:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .nav-icon i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Filter section */
+        .filter-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .product-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .nav-icons {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 100%;">
+            <div id="branding">
+                <h1>Ecommerce Admin</h1>
+            </div>
+            <div style="color: white;">
+                Welcome, Admin | <a href="#" style="color: white; text-decoration: underline;">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" style="padding: 20px; max-width: 1400px; margin: 0 auto;">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="#">Home</a> › 
+            <a href="#">Products</a> › 
+            Gallery View
+        </div>
+
+        <!-- Page Title -->
+        <h1 style="margin: 20px 0; color: var(--dark);">Product Gallery</h1>
+
+        <!-- Navigation Icons -->
+        <div class="custom-nav">
+            <h2>Quick Navigation</h2>
+            <div class="nav-icons">
+                <div class="nav-icon">
+                    <i>📊</i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-icon" style="background: var(--primary); color: white;">
+                    <i>📦</i>
+                    <span>Products</span>
+                </div>
+                <div class="nav-icon">
+                    <i>📁</i>
+                    <span>Categories</span>
+                </div>
+                <div class="nav-icon">
+                    <i>🏷️</i>
+                    <span>Brands</span>
+                </div>
+                <div class="nav-icon">
+                    <i>👥</i>
+                    <span>Users</span>
+                </div>
+                <div class="nav-icon">
+                    <i>⭐</i>
+                    <span>Reviews</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h2>Filter Products</h2>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">All Categories</option>
+                        <option value="1">Electronics</option>
+                        <option value="2">Clothing</option>
+                        <option value="3">Home & Garden</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="">All Statuses</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="DRAFT">Draft</option>
+                        <option value="DISCONTINUED">Discontinued</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="stock">Stock Status</label>
+                    <select id="stock">
+                        <option value="">All</option>
+                        <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" placeholder="Product name or SKU">
+                </div>
+            </div>
+            <button class="btn-primary" style="margin-top: 15px;">Apply Filters</button>
+        </div>
+
+        <!-- Product Gallery -->
+        <div class="product-gallery">
+            <!-- Product 1 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/4B6CB7/FFFFFF?text=Smartphone" alt="Smartphone">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Premium Smartphone X9</div>
+                    <div class="product-price">$899.99</div>
+                    <div class="product-meta">
+                        <span>SKU: PHN-X9-BLK</span>
+                        <span>Qty: 15</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-active">Active</span>
+                        <span>⭐ 4.8 (24)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Headphones" alt="Wireless Headphones">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Wireless Noise-Canceling Headphones</div>
+                    <div class="product-price">$249.99</div>
+                    <div class="product-meta">
+                        <span>SKU: AUD-HP-NC50</span>
+                        <span>Qty: 8</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-active">Active</span>
+                        <span>⭐ 4.6 (32)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/182848/FFFFFF?text=Smart+Watch" alt="Smart Watch">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Fitness Smart Watch Pro</div>
+                    <div class="product-price">$179.99</div>
+                    <div class="product-meta">
+                        <span>SKU: WTH-FIT-PRO</span>
+                        <span>Qty: 3</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-low-stock">Low Stock</span>
+                        <span>⭐ 4.3 (18)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/28a745/FFFFFF?text=Tablet" alt="Tablet">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Ultra-Slim Tablet Air</div>
+                    <div class="product-price">$549.99</div>
+                    <div class="product-meta">
+                        <span>SKU: TBL-AIR-64</span>
+                        <span>Qty: 0</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-discontinued">Discontinued</span>
+                        <span>⭐ 4.1 (12)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/ffc107/000000?text=Speaker" alt="Bluetooth Speaker">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Waterproof Bluetooth Speaker</div>
+                    <div class="product-price">$89.99</div>
+                    <div class="product-meta">
+                        <span>SKU: AUD-SPK-BT20</span>
+                        <span>Qty: 22</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-active">Active</span>
+                        <span>⭐ 4.7 (41)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://via.placeholder.com/300x200/dc3545/FFFFFF?text=Gaming+Console" alt="Gaming Console">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Next-Gen Gaming Console</div>
+                    <div class="product-price">$499.99</div>
+                    <div class="product-meta">
+                        <span>SKU: GAM-CON-NXT</span>
+                        <span>Qty: 5</span>
+                    </div>
+                    <div class="product-meta" style="margin-top: 10px;">
+                        <span class="status-badge status-active">Active</span>
+                        <span>⭐ 4.9 (67)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn-primary">Previous</button>
+            <span style="margin: 0 15px;">Page 1 of 4</span>
+            <button class="btn-primary">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Simple JavaScript for interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click event to product cards
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    alert('You clicked on a product. This would open the product edit page.');
+                });
+            });
+
+            // Add active state to filter button
+            const filterButton = document.querySelector('.btn-primary');
+            filterButton.addEventListener('click', function() {
+                alert('Filters applied! In a real application, this would filter the product gallery.');
+            });
+        });
+    </script>
+</body>
+</html>

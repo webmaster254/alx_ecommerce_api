@@ -1,0 +1,231 @@
+<!-- products/templates/products/product_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Ecommerce API{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'product-list' %}">Products</a></li>
+            {% if product.category %}
+            <li class="breadcrumb-item"><a href="{% url 'product-list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-6">
+            <div class="product-images">
+                {% if product.images.all %}
+                <div class="main-image mb-3">
+                    <img src="{{ product.images.first.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" id="mainImage">
+                </div>
+                <div class="thumbnail-images d-flex gap-2">
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" class="img-thumbnail {% if forloop.first %}active{% endif %}" 
+                         alt="{{ image.alt_text }}" style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                         onclick="document.getElementById('mainImage').src = this.src">
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <i class="fas fa-image fa-5x text-muted"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="product-info">
+                <h1 class="h2">{{ product.name }}</h1>
+                
+                <!-- Rating -->
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rating me-2">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star {% if forloop.counter <= product.average_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <span class="text-muted">({{ product.reviews.count }} reviews)</span>
+                </div>
+
+                <!-- Price -->
+                <div class="price mb-3">
+                    <span class="h3 text-primary">${{ product.price }}</span>
+                    {% if product.compare_price %}
+                    <span class="text-muted text-decoration-line-through ms-2">${{ product.compare_price }}</span>
+                    <span class="badge bg-danger ms-2">Save {{ product.discount_percentage }}%</span>
+                    {% endif %}
+                </div>
+
+                <!-- Stock Status -->
+                <div class="stock-status mb-3">
+                    <span class="badge bg-{% if product.is_in_stock %}success{% else %}danger{% endif %}">
+                        {% if product.is_in_stock %}
+                        {% if product.is_low_stock %}Low Stock - {% endif %}
+                        {{ product.quantity }} available
+                        {% else %}
+                        Out of Stock
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <div class="description mb-4">
+                    <h5>Description</h5>
+                    <p>{{ product.description }}</p>
+                </div>
+
+                <!-- Product Details -->
+                <div class="product-details mb-4">
+                    <h5>Details</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>SKU:</strong> {{ product.sku }}<br>
+                            <strong>Category:</strong> {{ product.category.name }}<br>
+                            {% if product.brand %}
+                            <strong>Brand:</strong> {{ product.brand.name }}<br>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
+                            {% if product.weight %}
+                            <strong>Weight:</strong> {{ product.weight }} kg<br>
+                            {% endif %}
+                            {% if product.is_digital %}
+                            <strong>Type:</strong> Digital Product<br>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="product-actions">
+                    {% if product.is_in_stock %}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-lg flex-fill">
+                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                        </button>
+                        {% if user.is_authenticated %}
+                        <form action="{% url 'wishlist' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button type="submit" class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <button class="btn btn-secondary btn-lg w-100" disabled>
+                        <i class="fas fa-bell me-2"></i>Notify When Available
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Customer Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    {% for review in reviews %}
+                    <div class="review-item mb-4 pb-4 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">{{ review.user_email }}</h6>
+                                <div class="rating">
+                                    {% for i in "12345" %}
+                                    <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        <h6 class="mb-2">{{ review.title }}</h6>
+                        <p class="mb-0">{{ review.comment }}</p>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                    <div class="mt-4">
+                        <h6>Write a Review</h6>
+                        <form method="post" action="{% url 'product-detail' product.slug %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <select class="form-select" name="rating" required>
+                                    <option value="">Select Rating</option>
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Review</label>
+                                <textarea class="form-control" name="comment" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <a href="{% url 'login' %}" class="alert-link">Login</a> to write a review.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4>Related Products</h4>
+            <div class="row">
+                {% for related_product in related_products %}
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        {% if related_product.images.first %}
+                        <img src="{{ related_product.images.first.image.url }}" class="card-img-top" alt="{{ related_product.name }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                            <i class="fas fa-image fa-2x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ related_product.name|truncatewords:5 }}</h6>
+                            <p class="card-text text-primary">${{ related_product.price }}</p>
+                            <a href="{% url 'product-detail' related_product.slug %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

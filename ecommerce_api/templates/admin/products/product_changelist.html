@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<div style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <a href="gallery/" class="button" style="background: #4B6CB7; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-flex; align-items: center;">
+        <span style="margin-right: 8px;">📷</span> View Product Gallery
+    </a>
+</div>
+{{ block.super }}
+{% endblock %}
