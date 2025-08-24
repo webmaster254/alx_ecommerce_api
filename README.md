@@ -15,7 +15,6 @@
 - [Installation & Setup](#installation--setup)
 - [API Endpoints](#api-endpoints-overview)
 - [Postman Testing](#postman-testing-guide)
-- [Contributing](#contributing)
 - [License](#license)
 
 
@@ -135,54 +134,6 @@ python manage.py runserver
 # Server will be available at http://127.0.0.1:8000/
 # API documentation at http://127.0.0.1:8000/api/schema/
 ```
-
-### Project Structure
-alx_ecommerce_api
-ecommerce_api/
-├── ecommerce_api/          # Main project settings
-│   ├── settings.py         # Django settings
-│   ├── urls.py            # Main URL routing
-│   └── wsgi.py            # WSGI configuration
-├── products/              # Products app
-│   ├── models.py          # Product, Category, Brand models
-│   ├── serializers.py     # Product serializers
-│   ├── views.py           # Product API views
-│   ├── urls.py           # Product endpoints
-│   └── admin.py          # Admin configuration
-├── inventory/             # Inventory management
-│   ├── models.py          # Inventory, StockMovement, Supplier
-│   ├── serializers.py     # Inventory serializers
-│   ├── views.py           # Inventory API views
-│   ├── urls.py           # Inventory endpoints
-│   ├── utils.py           # Inventory utilities
-│   └── admin.py          # Admin configuration
-├── promotions/            # Promotions system
-│   ├── models.py          # Coupon, Promotion, BundleOffer
-│   ├── serializers.py     # Promotion serializers
-│   ├── views.py           # Promotion API views
-│   ├── urls.py           # Promotion endpoints
-│   ├── utils.py           # Promotion utilities
-│   └── admin.py          # Admin configuration
-├── cart/                  # Shopping cart
-│   ├── models.py          # Cart, CartItem models
-│   ├── serializers.py     # Cart serializers
-│   ├── views.py           # Cart API views
-│   ├── urls.py           # Cart endpoints
-│   └── admin.py          # Admin configuration
-├── orders/                # Order management
-│   ├── models.py          # Order, Payment, Shipping
-│   ├── serializers.py     # Order serializers
-│   ├── views.py           # Order API views
-│   ├── urls.py           # Order endpoints
-│   └── admin.py          # Admin configuration
-├── users/                 # User management
-│   ├── models.py          # User models
-│   ├── serializers.py     # User serializers
-│   ├── views.py           # User API views
-│   ├── urls.py           # User endpoints
-│   └── admin.py          # Admin configuration
-├── manage.py              # Django management script
-└── requirements.txt       # Python dependencies
 
 ### API Endpoints Overview
 **Authentication Endpoints**
