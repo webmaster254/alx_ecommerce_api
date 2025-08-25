@@ -6,7 +6,7 @@ from .views import (
     UserProfileView, api_login_view, home_view,
     login_template_view, register_template_view,
     profile_template_view, user_list_template_view, logout_view,
-    admin_dashboard 
+    admin_dashboard , user_activity_view
 )
 
 router = DefaultRouter()
@@ -18,6 +18,7 @@ api_urlpatterns = [
     path('login/', UserLoginView.as_view(), name='login'),
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('auth/login/', api_login_view, name='auth-login'),
+    path('user/activity/', user_activity_view, name="user-activity"),
 ]
 
 # Template URLs (for browser access - under /users/)

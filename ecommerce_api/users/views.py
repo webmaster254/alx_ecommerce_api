@@ -17,6 +17,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import login, authenticate, logout
 from .forms import CustomAuthenticationForm, UserRegistrationForm
 from .utils import get_client_ip, is_staff_user, track_user_activity
+from rest_framework.pagination import PageNumberPagination
+from .serializers import UserActivitySerializer
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, 
     UserProfileSerializer, UserAdminSerializer, UserProfileDetailSerializer
@@ -589,28 +591,44 @@ def verify_email_template(request, token):
     
     return render(request, 'users/verify_email.html', context)
 
-# Additional utility view
+# Utility function 
+def log_user_activity(user, action, request, details=None):
+    """Helper to create a user activity log entry."""
+    if user and user.is_authenticated:
+        UserActivity.objects.create(
+            user=user,
+            action=action,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", "")[:255],  
+        )
+
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def user_activity_view(request):
-    """Get current user's activity history"""
-    # Track activity view request
-    UserActivity.objects.create(
+    """
+    Retrieve the authenticated user's activity history.
+
+    Features:
+    - Tracks when a user views their own activity.
+    - Returns paginated activity list.
+    - Uses serializer for consistent formatting.
+    """
+    # Log this action
+    log_user_activity(
         user=request.user,
-        action='view_own_activities',
-        ip_address=get_client_ip(request),
-        user_agent=request.META.get('HTTP_USER_AGENT', ''),
-        details={'method': 'api'}
+        action="view_own_activities",
+        request=request,
+        details={"method": "api"},
     )
-    
-    activities = UserActivity.objects.filter(user=request.user).order_by('-timestamp')[:50]
-    data = [
-        {
-            'action': activity.action,
-            'timestamp': activity.timestamp,
-            'ip_address': activity.ip_address,
-            'details': activity.details
-        }
-        for activity in activities
-    ]
-    return Response(data)
+
+    # Get user activities ordered by latest
+    queryset = UserActivity.objects.filter(user=request.user).order_by("-timestamp")
+
+    # Paginate results
+    paginator = PageNumberPagination()
+    paginator.page_size = 20
+    paginated_qs = paginator.paginate_queryset(queryset, request)
+
+    serializer = UserActivitySerializer(paginated_qs, many=True)
+    return paginator.get_paginated_response(serializer.data)

@@ -23,11 +23,10 @@ class BrandSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = ProductImage
-        fields = ['id', 'image', 'image_url', 'alt_text', 'is_primary', 'order', 'created_at']
+        fields = ['id', 'image', 'alt_text', 'is_primary', 'order', 'created_at']
         read_only_fields = ['id', 'created_at']
     
     def get_image_url(self, obj):

@@ -41,6 +41,7 @@ class CustomUser(AbstractUser):
         ADMIN = 'ADMIN', 'Admin'
         STAFF = 'STAFF', 'Staff'
         CUSTOMER = 'CUSTOMER', 'Customer'
+        VENDOR = 'VENDOR', 'Vendor'
 
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=50, choices=Role.choices, default=Role.CUSTOMER)
@@ -72,15 +73,20 @@ class CustomUser(AbstractUser):
     registration_ip = models.GenericIPAddressField(blank=True, null=True)
     date_joined = models.DateTimeField(default=timezone.now)
 
-    profile_picture = models.URLField(blank=True, null=True, help_text="Optional. You can add a profile picture later.")
+    profile_picture = models.ImageField(blank=True, null=True, help_text="Optional. You can add a profile picture later.")
     loyalty_tier = models.CharField(max_length=50, blank=True, default='Standard')
     internal_note = models.TextField(blank=True, null=True, help_text="Private notes for staff about this user.")
+
+     # Engagement features 
+    favorites = models.ManyToManyField("products.Product", related_name="favorited_by", blank=True)
+
 
     class Meta:
         permissions = [
             ("can_view_customer_list", "Can view the list of all customers"),
             ("can_deactivate_user", "Can deactivate a user account"),
             ("can_promote_to_staff", "Can assign a user to the Staff role"),
+            ("can_manage_vendors", "Can manage vendor accounts"),
         ]
 
     def __str__(self):
@@ -94,6 +100,9 @@ class CustomUser(AbstractUser):
     
     def is_customer_user(self): 
         return self.role == self.Role.CUSTOMER
+    
+    def is_vendor_user(self):
+        return self.role == self.Role.VENDOR
     
     @property
     def age(self):
@@ -116,16 +125,14 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         CustomUser, 
         on_delete=models.CASCADE, 
-        related_name='user_profile'  # Changed to avoid conflict
+        related_name='user_profile'  
     )
     shipping_address = models.TextField(blank=True)
     billing_address = models.TextField(blank=True)
     preferred_payment_method = models.CharField(max_length=100, blank=True)
-    # Removed wishlist reference to avoid circular imports
     cart = models.JSONField(default=dict)
     newsletter_subscription = models.BooleanField(default=False)
-    loyalty_points = models.IntegerField(default=0)  # Added loyalty points
-    
+    loyalty_points = models.IntegerField(default=0) 
     def __str__(self):
         return f"{self.user.email}'s Profile"
     
@@ -137,12 +144,14 @@ class UserProfile(models.Model):
 
 
 class UserActivity(models.Model):
-    user = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.CASCADE, 
-        related_name='user_activities'  
-    )
-    action = models.CharField(max_length=100)
+    class ActivityType(models.TextChoices):
+        LOGIN = 'LOGIN', 'User Login'
+        LOGOUT = 'LOGOUT', 'User Logout'
+        PURCHASE = 'PURCHASE', 'Made a Purchase'
+        WISHLIST_ADD = 'WISHLIST_ADD', 'Added to Wishlist'
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_activities')
+    action = models.CharField(max_length=100, choices=ActivityType.choices)  # <-- enforce choices
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -151,6 +160,10 @@ class UserActivity(models.Model):
     class Meta:
         ordering = ['-timestamp']
         verbose_name_plural = 'User activities'
-    
+        indexes = [
+            models.Index(fields=['timestamp']),
+            models.Index(fields=['action']),
+    ]
+
     def __str__(self):
         return f"{self.user.email} - {self.action} at {self.timestamp}"
