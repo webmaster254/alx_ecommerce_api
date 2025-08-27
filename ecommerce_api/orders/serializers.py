@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from .models import Order, OrderItem, Payment, Shipping
 from products.serializers import ProductSerializer
+from decimal import Decimal
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_details = ProductSerializer(source='product', read_only=True)
@@ -20,10 +22,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = ['product_name', 'product_sku', 'price']
 
 class OrderSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
     item_count = serializers.IntegerField(read_only=True)
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = Order
         fields = [
@@ -40,6 +43,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'discount_amount', 'total', 'created_at', 'updated_at'
         ]
 
+
 class OrderCreateSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
 
@@ -52,18 +56,28 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             'billing_country', 'email', 'phone', 'customer_notes', 'items'
         ]
 
+    from decimal import Decimal
+
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
-        
+        # Provide default zeros for required calculated fields
+        order = Order.objects.create(
+            subtotal=Decimal('0.00'),
+            tax_amount=Decimal('0.00'),
+            shipping_cost=Decimal('0.00'),
+            discount_amount=Decimal('0.00'),
+            total=Decimal('0.00'),
+            **validated_data
+        )
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
-        
-        # Calculate order totals (you'll need to implement this logic)
-        order.calculate_totals()
+
+        order.calculate_totals()  # implement this method to sum items and update order
         order.save()
-        
+
         return order
+
+    
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:

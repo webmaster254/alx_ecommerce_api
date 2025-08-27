@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
-from taggit.managers import TaggableManager  # Added for tagging
+from taggit.managers import TaggableManager  
+from django.utils.text import slugify
 
 CustomUser = get_user_model()
 
@@ -97,8 +98,23 @@ class Product(models.Model):
         return reverse('products:product_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
+        # Generate slug if not provided or if name changed
+        if not self.slug or (self.pk and Product.objects.get(pk=self.pk).name != self.name):
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            
+            # Ensure slug is unique
+            while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+                
+            self.slug = slug
+        
+        # Set published_at for active products
         if self.status == 'ACTIVE' and not self.published_at:
             self.published_at = timezone.now()
+            
         super().save(*args, **kwargs)
 
     def reduce_stock(self, quantity):

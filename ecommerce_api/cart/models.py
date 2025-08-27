@@ -11,7 +11,8 @@ class Cart(models.Model):
         on_delete=models.CASCADE,
         related_name='cart',
         null=True,
-        blank=True
+        unique=True,
+        blank=True   
     )
     session_key = models.CharField(max_length=40, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,7 +21,18 @@ class Cart(models.Model):
     guest_name = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
-        ordering = ['-updated_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'], 
+                name='unique_user_cart',
+                condition=models.Q(user__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['session_key'], 
+                name='unique_session_cart',
+                condition=models.Q(session_key__isnull=False)
+            )
+        ]
 
     def __str__(self):
         if self.user:

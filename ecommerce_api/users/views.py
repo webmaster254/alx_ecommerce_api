@@ -54,7 +54,11 @@ def home_view(request):
 
 def login_template_view(request):
     """Template-based login view"""
-    if request.method == 'POST':
+    if request.method == 'GET':
+        # Handle GET request - show the login form
+        return render(request, 'users/login.html')
+    
+    elif request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
@@ -86,7 +90,9 @@ def login_template_view(request):
                 pass
             
             messages.error(request, 'Invalid credentials')
+            return render(request, 'users/login.html')  
     
+    # Fallback for other methods
     return render(request, 'users/login.html')
 
 def register_template_view(request):
@@ -540,53 +546,75 @@ class EmailVerificationView(APIView):
         email = request.data.get('email')
         try:
             user = CustomUser.objects.get(email=email)
-            # TODO: Implement email sending logic
             
-            # Track email verification request
-            UserActivity.objects.create(
-                user=user,
-                action='email_verification_request',
-                ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                details={'method': 'api'}
-            )
+            # Use the send_verification_email function
+            send_verification_email(user, request)
             
             return Response({'message': 'Verification email sent'})
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    def get(self, request, token):
-        # Verify email token logic
-        # TODO: Implement token verification logic
-        
-        # Track email verification
-        UserActivity.objects.create(
-            user=request.user if request.user.is_authenticated else None,
-            action='email_verified',
-            ip_address=get_client_ip(request),
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            details={'method': 'api', 'token': token}
-        )
-        
-        return Response({'message': 'Email verified successfully'})
+    def get(self, request, token=None):
+        if token:
+            # Only create activity if user is authenticated
+            if request.user.is_authenticated:
+                UserActivity.objects.create(
+                    user=request.user,  # Don't allow None
+                    action='email_verified',
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
+                    details={'method': 'api', 'token': token}
+                )
+            
+            # TODO: Implement actual token verification logic here
+            # For now, just return success
+            return Response({'message': 'Email verified successfully'})
+        else:
+            # Handle case where no token is provided
+            return Response({'error': 'Token required'}, status=status.HTTP_400_BAD_REQUEST)
+
+def send_verification_email(user, request):
+    """
+    Send verification email to user
+    Implement your actual email sending logic here
+    """
+    # TODO: Implement actual email sending logic
+    # This would typically:
+    # 1. Generate a verification token
+    # 2. Create a verification link
+    # 3. Send email with the link
+    
+    # Track email sending activity
+    UserActivity.objects.create(
+        user=user,
+        action='verification_email_sent',
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
+        details={'method': 'api'}
+    )
+    
+    return True  # Return True to indicate success
 
 def verify_email_template(request, token):
     """Template view for email verification"""
-    # TODO: Implement email verification logic
+    # Only create activity if user is authenticated
+    if request.user.is_authenticated:
+        UserActivity.objects.create(
+            user=request.user,  # Don't allow None
+            action='email_verification_attempt',
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
+            details={'method': 'template', 'token': token}
+        )
+    
+    # DEFINE the context variable here (this was missing)
     context = {'token': token, 'verified': False}
     
-    # Track email verification attempt
-    UserActivity.objects.create(
-        user=request.user if request.user.is_authenticated else None,
-        action='email_verification_attempt',
-        ip_address=get_client_ip(request),
-        user_agent=request.META.get('HTTP_USER_AGENT', ''),
-        details={'method': 'template', 'token': token}
-    )
-    
-    # Simulate verification for now
+    # Simulate verification for now (replace with actual verification logic)
     if token:  # Replace with actual verification logic
         context['verified'] = True
+        # Use Django's messages framework if needed
+        from django.contrib import messages
         messages.success(request, 'Email verified successfully!')
     
     return render(request, 'users/verify_email.html', context)

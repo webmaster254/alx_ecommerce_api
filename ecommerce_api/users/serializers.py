@@ -5,7 +5,7 @@ from django.db.models import Count
 from .models import CustomUser, UserProfile, UserActivity
 
 
-class UserProfileDataSerializer(serializers.ModelSerializer):  # Renamed to avoid conflict
+class UserProfileDataSerializer(serializers.ModelSerializer):  
     """Serializer for UserProfile model"""
     class Meta:
         model = UserProfile

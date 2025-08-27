@@ -48,23 +48,30 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated, IsStaffOrOrderOwner]
-    
+
     def get_queryset(self):
+        order_pk = self.kwargs.get('order_pk')
         user = self.request.user
+        qs = Payment.objects.all()
         if user.is_staff:
-            return Payment.objects.all()
-        return Payment.objects.filter(order__user=user)
+            if order_pk:
+                qs = qs.filter(order__id=order_pk)
+            return qs
+        return qs.filter(order__id=order_pk, order__user=user)
+    
 
 class ShippingViewSet(viewsets.ModelViewSet):
-    queryset = Shipping.objects.all()
     serializer_class = ShippingSerializer
     permission_classes = [permissions.IsAuthenticated, IsStaffOrOrderOwner]
-    
+
     def get_queryset(self):
+        order_pk = self.kwargs.get('order_pk')
         user = self.request.user
+        qs = Shipping.objects.all()
         if user.is_staff:
-            return Shipping.objects.all()
-        return Shipping.objects.filter(order__user=user)
+            if order_pk:
+                qs = qs.filter(order__id=order_pk)
+            return qs
+        return qs.filter(order__id=order_pk, order__user=user)

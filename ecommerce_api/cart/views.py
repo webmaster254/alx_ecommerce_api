@@ -5,14 +5,16 @@ from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem, SavedCart
 from .serializers import (
     CartSerializer, CartItemSerializer, AddToCartSerializer,
-    UpdateCartItemSerializer, SavedCartSerializer
+    UpdateCartItemSerializer, SavedCartSerializer, CartItemAddSerializer
 )
 from .permissions import IsCartOwner
+from products.models import Product
+
 
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsCartOwner]
-    
+
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
@@ -22,64 +24,92 @@ class CartViewSet(viewsets.ModelViewSet):
         return Cart.objects.none()
 
     def get_object(self):
-        if self.request.user.is_authenticated:
-            cart, created = Cart.objects.get_or_create(user=self.request.user)
-            return cart
-        elif hasattr(self.request, 'cart'):
-            return self.request.cart
-        return None
+        # Retrieve cart filtered by current user to enforce ownership restrictions
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=self.kwargs.get(self.lookup_field or 'pk'))
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     @action(detail=False, methods=['post'])
     def add_item(self, request):
-        serializer = AddToCartSerializer(data=request.data)
+        serializer = CartItemAddSerializer(data=request.data)
         if serializer.is_valid():
-            cart = self.get_object()
-            product = serializer.validated_data['product']
+            product_id = serializer.validated_data['product_id']
             quantity = serializer.validated_data['quantity']
-            
-            # Check if item already exists in cart
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response(
+                    {"error": "Product not found"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if quantity <= 0:
+                return Response(
+                    {"error": "Quantity must be positive"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get or create user's cart
+            if request.user.is_authenticated:
+                cart, _ = Cart.objects.get_or_create(user=request.user)
+            elif hasattr(request, 'cart'):
+                cart = request.cart
+            else:
+                return Response(
+                    {"error": "Authentication required to add items"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Check if CartItem exists, update or create
             cart_item, created = CartItem.objects.get_or_create(
                 cart=cart,
                 product=product,
                 defaults={'quantity': quantity}
             )
-            
             if not created:
-                cart_item.quantity += quantity
+                new_quantity = cart_item.quantity + quantity
+                if new_quantity > product.quantity:
+                    return Response(
+                        {"error": "Insufficient stock"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                cart_item.quantity = new_quantity
                 cart_item.save()
-            
-            return Response(CartItemSerializer(cart_item).data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                if quantity > product.quantity:
+                    # Rollback creation if quantity invalid
+                    cart_item.delete()
+                    return Response(
+                        {"error": "Insufficient stock"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
-    @action(detail=False, methods=['post'])
-    def clear(self, request):
-        cart = self.get_object()
-        cart.clear()
-        return Response({'status': 'cart cleared'})
+            return Response(
+                CartItemSerializer(cart_item).data,
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'])
-    def count(self, request):
-        cart = self.get_object()
-        return Response({'count': cart.total_items})
 
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsCartOwner]
-    
+
+    def get_cart(self):
+        if self.request.user.is_authenticated:
+            cart, _ = Cart.objects.get_or_create(user=self.request.user)
+            return cart
+        elif hasattr(self.request, 'cart'):
+            return self.request.cart
+        return None
+
     def get_queryset(self):
         cart = self.get_cart()
         if cart:
             return CartItem.objects.filter(cart=cart)
         return CartItem.objects.none()
-
-    def get_cart(self):
-        if self.request.user.is_authenticated:
-            cart, created = Cart.objects.get_or_create(user=self.request.user)
-            return cart
-        elif hasattr(self.request, 'cart'):
-            return self.request.cart
-        return None
 
     def get_serializer_class(self):
         if self.action in ['update', 'partial_update']:
@@ -90,21 +120,22 @@ class CartItemViewSet(viewsets.ModelViewSet):
         cart = self.get_cart()
         serializer.save(cart=cart)
 
+
 class SavedCartViewSet(viewsets.ModelViewSet):
     serializer_class = SavedCartSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         return SavedCart.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
     def restore(self, request, pk=None):
         saved_cart = self.get_object()
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
         for saved_item in saved_cart.items.all():
             cart_item, created = CartItem.objects.get_or_create(
                 cart=cart,
@@ -114,5 +145,5 @@ class SavedCartViewSet(viewsets.ModelViewSet):
             if not created:
                 cart_item.quantity = saved_item.quantity
                 cart_item.save()
-        
+
         return Response(CartSerializer(cart).data)

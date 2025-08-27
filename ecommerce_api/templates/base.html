@@ -199,6 +199,7 @@
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </button>
                         </form>
+                        
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -206,11 +207,17 @@
                             <i class="bi bi-box-arrow-in-right"></i> Login
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user-register' %}">
+                        <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+
 
     <!-- Main Content -->
     <div class="container mt-4">

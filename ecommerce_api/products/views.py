@@ -258,7 +258,7 @@ def search_products(request):
 # ============================================================================
 
 class ProductListAPIView(generics.ListCreateAPIView):
-    queryset = Product.objects.filter(status='ACTIVE')
+    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')  
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'brand', 'is_featured']

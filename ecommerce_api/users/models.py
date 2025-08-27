@@ -151,8 +151,8 @@ class UserActivity(models.Model):
         WISHLIST_ADD = 'WISHLIST_ADD', 'Added to Wishlist'
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_activities')
-    action = models.CharField(max_length=100, choices=ActivityType.choices)  # <-- enforce choices
-    ip_address = models.GenericIPAddressField()
+    action = models.CharField(max_length=100, choices=ActivityType.choices)  
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     details = models.JSONField(default=dict)
