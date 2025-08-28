@@ -419,3 +419,4 @@ erDiagram
     STOCK_ADJUSTMENT ||--|| CUSTOM_USER : "adjusted_by"
     COUPON ||--|| CUSTOM_USER : "created_by"
     PROMOTION ||--|| CUSTOM_USER : "created_by"
+```
