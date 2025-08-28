@@ -1,7 +1,7 @@
 # E-Commerce API - Database Entity Relationship Diagram
+This ERD represents the complete database structure for the Django E-Commerce Platform, showing all entities, their attributes, and relationships across 6 applications.
 
 ## Complete System ERD
-#  E-Commerce Platform - Database Entity Relationship Diagram
 
 ```mermaid
 erDiagram
@@ -423,7 +423,7 @@ erDiagram
 ```
 
 ### Full Detailed Diagram
-![Database ERD Diagram](https://github.com/Dama5323/alx_ecommerce_api/raw/main/CAPSTONE%20PROJECT%20ERD.png)
+![Database ERD Diagram](https://github.com/Dama5323/alx_ecommerce_api/raw/main/ecommerce_api/CAPSTONE%20PROJECT%20ERD.png)
 
 ## Database Schema Overview
 
