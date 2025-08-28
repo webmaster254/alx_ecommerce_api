@@ -1,0 +1,421 @@
+# E-Commerce Platform - Database Entity Relationship Diagram
+
+## Complete System ERD
+
+```mermaid
+erDiagram
+    %% ==================== USERS APP ====================
+    CUSTOM_USER {
+        int id PK
+        string email UK
+        string role
+        date date_of_birth
+        char gender
+        string phone_number
+        bool accepts_marketing
+        bool email_verified
+        bool phone_verified
+        bool is_active
+        string last_login_ip
+        string registration_ip
+        datetime date_joined
+        string profile_picture
+        string loyalty_tier
+        text internal_note
+    }
+
+    USER_PROFILE {
+        int id PK
+        int user_id FK
+        text shipping_address
+        text billing_address
+        string preferred_payment_method
+        json cart
+        bool newsletter_subscription
+        int loyalty_points
+    }
+
+    USER_ACTIVITY {
+        int id PK
+        int user_id FK
+        string action
+        string ip_address
+        text user_agent
+        datetime timestamp
+        json details
+    }
+
+    %% ==================== PRODUCTS APP ====================
+    CATEGORY {
+        int id PK
+        string name UK
+        text description
+        string slug UK
+        datetime created_at
+        datetime updated_at
+    }
+
+    BRAND {
+        int id PK
+        string name UK
+        text description
+        string website
+        datetime created_at
+        datetime updated_at
+    }
+
+    PRODUCT {
+        int id PK
+        string name
+        string slug UK
+        text description
+        decimal price
+        decimal compare_price
+        decimal cost
+        string sku UK
+        string barcode
+        int quantity
+        int low_stock_threshold
+        string status
+        bool is_featured
+        bool is_digital
+        decimal weight
+        decimal length
+        decimal width
+        decimal height
+        string seo_title
+        text seo_description
+        datetime created_at
+        datetime updated_at
+        datetime published_at
+    }
+
+    PRODUCT_IMAGE {
+        int id PK
+        int product_id FK
+        string image
+        string alt_text
+        bool is_primary
+        int order
+        datetime created_at
+    }
+
+    PRODUCT_REVIEW {
+        int id PK
+        int product_id FK
+        int user_id FK
+        int rating
+        string title
+        text comment
+        bool is_approved
+        datetime created_at
+        datetime updated_at
+    }
+
+    PRODUCT_ACTIVITY {
+        int id PK
+        int product_id FK
+        int user_id FK
+        string action
+        string ip_address
+        text user_agent
+        json details
+        datetime timestamp
+    }
+
+    WISHLIST {
+        int id PK
+        int user_id FK
+        int product_id FK
+        datetime added_at
+    }
+
+    %% ==================== ORDERS APP ====================
+    ORDER {
+        int id PK
+        int user_id FK
+        string order_number UK
+        string status
+        string payment_status
+        text shipping_address
+        text billing_address
+        decimal subtotal
+        decimal tax_amount
+        decimal shipping_cost
+        decimal discount_amount
+        decimal total
+        string email
+        string phone
+        string payment_method
+        string transaction_id
+        datetime created_at
+        datetime updated_at
+        datetime paid_at
+        datetime shipped_at
+        datetime delivered_at
+        text customer_notes
+        text admin_notes
+    }
+
+    ORDER_ITEM {
+        int id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+        decimal price
+        decimal discount_amount
+        string product_name
+        string product_sku
+        datetime created_at
+    }
+
+    PAYMENT {
+        int id PK
+        int order_id FK
+        string payment_method
+        decimal amount
+        string status
+        string transaction_id UK
+        json payment_details
+        datetime created_at
+        datetime completed_at
+    }
+
+    SHIPPING {
+        int id PK
+        int order_id FK
+        string shipping_method
+        string tracking_number
+        string carrier
+        string status
+        decimal shipping_cost
+        datetime estimated_delivery
+        datetime actual_delivery
+        datetime created_at
+    }
+
+    %% ==================== CART APP ====================
+    CART {
+        int id PK
+        int user_id FK
+        string session_key
+        string guest_email
+        string guest_name
+        datetime created_at
+    }
+
+    CART_ITEM {
+        int id PK
+        int cart_id FK
+        int product_id FK
+        int quantity
+        text notes
+        datetime added_at
+    }
+
+    SAVED_CART {
+        int id PK
+        int user_id FK
+        string name
+        datetime created_at
+    }
+
+    %% ==================== INVENTORY APP ====================
+    SUPPLIER {
+        int id PK
+        string name
+        string contact_person
+        string email
+        string phone
+        text address
+        datetime created_at
+    }
+
+    INVENTORY {
+        int id PK
+        int product_id FK
+        int stock_level
+        int low_stock_threshold
+        int reserved_stock
+        datetime last_updated
+    }
+
+    STOCK_MOVEMENT {
+        int id PK
+        int inventory_id FK
+        string movement_type
+        int quantity
+        string reference
+        text notes
+        datetime created_at
+    }
+
+    PURCHASE_ORDER {
+        int id PK
+        int supplier_id FK
+        string order_number UK
+        string status
+        date expected_delivery
+        text notes
+        datetime created_at
+    }
+
+    PURCHASE_ORDER_ITEM {
+        int id PK
+        int purchase_order_id FK
+        int product_id FK
+        int quantity
+        int received_quantity
+        decimal unit_cost
+    }
+
+    STOCK_ADJUSTMENT {
+        int id PK
+        int inventory_id FK
+        string adjustment_type
+        int quantity
+        text reason
+        datetime created_at
+    }
+
+    %% ==================== PROMOTIONS APP ====================
+    PROMOTION_TYPE {
+        int id PK
+        string name UK
+        text description
+        bool is_active
+        datetime created_at
+    }
+
+    COUPON {
+        int id PK
+        string code UK
+        string discount_type
+        decimal discount_value
+        decimal max_discount
+        decimal min_order_amount
+        int usage_limit
+        int usage_count
+        int user_usage_limit
+        datetime valid_from
+        datetime valid_to
+        bool is_active
+        bool applicable_to_all_products
+        datetime created_at
+    }
+
+    PROMOTION {
+        int id PK
+        string name
+        int promotion_type_id FK
+        string specific_type
+        decimal discount_percentage
+        decimal discount_amount
+        bool is_free_shipping
+        datetime start_date
+        datetime end_date
+        bool is_active
+        bool applicable_to_all_products
+        string banner_image
+        int display_priority
+        datetime created_at
+    }
+
+    BUNDLE_OFFER {
+        int id PK
+        int promotion_id FK
+        int buy_quantity
+        int get_quantity
+        decimal get_discount_percentage
+        decimal get_discount_amount
+    }
+
+    PROMOTION_USAGE {
+        int id PK
+        int promotion_id FK
+        int user_id FK
+        int order_id FK
+        datetime used_at
+        decimal discount_amount
+    }
+
+    COUPON_USAGE {
+        int id PK
+        int coupon_id FK
+        int user_id FK
+        int order_id FK
+        datetime used_at
+        decimal discount_amount
+    }
+
+    PROMO_BANNER {
+        int id PK
+        string title
+        text description
+        string image
+        string link_url
+        bool is_active
+        int display_order
+        datetime start_date
+        datetime end_date
+        datetime created_at
+    }
+
+    %% ==================== RELATIONSHIPS ====================
+    CUSTOM_USER ||--o{ USER_ACTIVITY : "generates"
+    CUSTOM_USER ||--|| USER_PROFILE : "has"
+    CUSTOM_USER }o--o{ PRODUCT : "favorites"
+    CUSTOM_USER ||--o{ PRODUCT_REVIEW : "writes"
+    CUSTOM_USER ||--o{ PRODUCT_ACTIVITY : "performs"
+    CUSTOM_USER ||--o{ WISHLIST : "adds_to"
+
+    CATEGORY ||--o{ PRODUCT : "categorizes"
+    BRAND ||--o{ PRODUCT : "manufactures"
+    PRODUCT ||--o{ PRODUCT_IMAGE : "has"
+    PRODUCT ||--o{ PRODUCT_REVIEW : "receives"
+    PRODUCT ||--o{ PRODUCT_ACTIVITY : "logs_activity"
+    PRODUCT ||--o{ WISHLIST : "is_wishlisted"
+
+    CUSTOM_USER ||--o{ ORDER : "places"
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    ORDER ||--o{ PAYMENT : "has"
+    ORDER ||--|| SHIPPING : "has"
+    ORDER_ITEM }|--|| PRODUCT : "is_a"
+    ORDER }|--|| COUPON : "uses_coupon"
+
+    CUSTOM_USER ||--|| CART : "has"
+    CART ||--o{ CART_ITEM : "contains"
+    CART_ITEM }|--|| PRODUCT : "is_a"
+    CUSTOM_USER ||--o{ SAVED_CART : "saves"
+    SAVED_CART }o--o{ CART_ITEM : "contains"
+
+    PRODUCT ||--|| INVENTORY : "has_stock"
+    INVENTORY ||--o{ STOCK_MOVEMENT : "tracks_movements"
+    INVENTORY ||--o{ STOCK_ADJUSTMENT : "has_adjustments"
+    SUPPLIER ||--o{ PURCHASE_ORDER : "supplies"
+    PURCHASE_ORDER ||--o{ PURCHASE_ORDER_ITEM : "contains"
+    PURCHASE_ORDER_ITEM }|--|| PRODUCT : "for_product"
+
+    PROMOTION_TYPE ||--o{ PROMOTION : "categorizes"
+    PROMOTION ||--|| BUNDLE_OFFER : "has_bundle_details"
+    PROMOTION ||--o{ PROMOTION_USAGE : "is_used_in"
+    COUPON ||--o{ COUPON_USAGE : "is_used_in"
+    PROMOTION }o--o{ CATEGORY : "applies_to_categories"
+    PROMOTION }o--o{ PRODUCT : "applies_to_products"
+    PROMOTION }o--o{ PRODUCT : "excludes_products"
+    COUPON }o--o{ CATEGORY : "applies_to_categories"
+    COUPON }o--o{ PRODUCT : "applies_to_products"
+    COUPON }o--o{ PRODUCT : "excludes_products"
+
+    PROMOTION_USAGE }|--|| ORDER : "applied_to_order"
+    COUPON_USAGE }|--|| ORDER : "applied_to_order"
+    PROMOTION_USAGE }|--|| CUSTOM_USER : "used_by_user"
+    COUPON_USAGE }|--|| CUSTOM_USER : "used_by_user"
+
+    PRODUCT ||--|| CUSTOM_USER : "created_by"
+    PRODUCT ||--|| CUSTOM_USER : "updated_by"
+    STOCK_MOVEMENT ||--|| CUSTOM_USER : "created_by"
+    PURCHASE_ORDER ||--|| CUSTOM_USER : "created_by"
+    STOCK_ADJUSTMENT ||--|| CUSTOM_USER : "adjusted_by"
+    COUPON ||--|| CUSTOM_USER : "created_by"
+    PROMOTION ||--|| CUSTOM_USER : "created_by"
