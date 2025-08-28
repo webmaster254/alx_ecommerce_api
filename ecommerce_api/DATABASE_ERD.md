@@ -422,9 +422,6 @@ erDiagram
     PROMOTION ||--|| CUSTOM_USER : "created_by"
 ```
 
-### Full Detailed Diagram
-![Database ERD Diagram](https://github.com/Dama5323/alx_ecommerce_api/raw/main/ecommerce_api/CAPSTONE%20PROJECT%20ERD.png)
-
 ## Database Schema Overview
 
 This ERD represents the complete database structure for the E-Commerce API application, showing all entities, their attributes, and relationships.
