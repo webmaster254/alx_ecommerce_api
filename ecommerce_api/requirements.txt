@@ -10,7 +10,7 @@ colorama==0.4.6
 coverage==7.10.5
 decouple==0.0.7
 dj-database-url==3.0.1
-Django==5.2.5
+Django==4.2.13
 django-filter==25.1
 django-sslserver==0.22
 django-taggit==6.1.0
@@ -48,5 +48,6 @@ uritemplate==4.2.0
 vine==5.1.0
 wcwidth==0.2.13
 whitenoise==6.9.0
+
 
 
