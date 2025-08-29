@@ -4,14 +4,14 @@ services:
     env: python
     plan: free
     branch: main
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    buildCommand: "./build.sh"
     startCommand: gunicorn ecommerce_api.wsgi:application
     envVars:
       - key: DEBUG
-        value: false
+        value: "false"
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: 4
+        value: "4"
       - key: PYTHON_VERSION
-        value: 3.9.13
+        value: "3.9.13"
