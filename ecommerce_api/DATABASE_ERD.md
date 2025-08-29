@@ -417,11 +417,11 @@ erDiagram
     PRODUCT ||--|| CUSTOM_USER : "updated_by"
     STOCK_MOVEMENT ||--|| CUSTOM_USER : "created_by"
     PURCHASE_ORDER ||--|| CUSTOM_USER : "created_by"
-    STOCK_ADJUSTMENT ||--|| CUSTOM_USER : "adjusted_by"
     COUPON ||--|| CUSTOM_USER : "created_by"
+    STOCK_ADJUSTMENT ||--|| CUSTOM_USER : "adjusted_by"
     PROMOTION ||--|| CUSTOM_USER : "created_by"
-```
 
+```
 ## Database Schema Overview
 
 This ERD represents the complete database structure for the E-Commerce API application, showing all entities, their attributes, and relationships.
