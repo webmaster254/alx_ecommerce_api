@@ -4,8 +4,8 @@ services:
     env: python
     plan: free
     branch: main
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn ecommerce_api.wsgi:application"
+    buildCommand: "cd ecommerce_api && ./build.sh"
+    startCommand: "cd ecommerce_api && gunicorn ecommerce_api.wsgi:application"
     envVars:
       - key: DEBUG
         value: "false"
