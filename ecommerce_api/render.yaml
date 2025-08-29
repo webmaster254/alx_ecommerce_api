@@ -4,7 +4,11 @@ services:
     env: python
     plan: free
     branch: main
-    buildCommand: "cd ecommerce_api && chmod +x build.sh && ./build.sh"
+    buildCommand: |
+      cd ecommerce_api
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
     startCommand: "cd ecommerce_api && gunicorn ecommerce_api.wsgi:application"
     envVars:
       - key: DEBUG
