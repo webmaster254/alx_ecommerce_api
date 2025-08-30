@@ -16,3 +16,8 @@ services:
         value: "4"
       - key: PYTHON_VERSION
         value: "3.9.13"
+ # Force Render to use pip instead of Poetry
+    config:
+      python:
+        version: 3.9.13
+        installCommand: pip install -r requirements.txt
