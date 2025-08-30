@@ -3,10 +3,10 @@ services:
     name: alx-ecommerce-api
     env: python
     plan: free
-    buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn ecommerce_api.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    buildCommand: "cd ecommerce_api && ./build.sh"
+    startCommand: "cd ecommerce_api && python -m gunicorn ecommerce_api.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
     envVars:
-      - key: postgresql://ecommerce:NGIdPN3AxScjn6wAuLjNG9yftp9OdJvV@dpg-d2p96256ubrc73c2k0jg-a/ecommerce_446i
+      - key: DATABASE_URL
         fromDatabase:
           name: ecommerce
           property: connectionString
@@ -19,7 +19,7 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.0"
       - key: PYTHONPATH
-        value: "."
+        value: "./ecommerce_api"
       - key: PYTHONUNBUFFERED
         value: "1"
     region: oregon
