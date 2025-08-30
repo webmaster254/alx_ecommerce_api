@@ -1,15 +1,14 @@
+# ecommerce_api/render.yaml
 services:
   - type: web
-    name: ecommerce-api
+    name: alx-ecommerce-api
     env: python
     plan: free
-    branch: main
-    rootDir: ecommerce_api
-    buildCommand: ./build.sh
-    startCommand: gunicorn ecommerce_api.wsgi:application
+    buildCommand: "cd ecommerce_api && ./build.sh"
+    startCommand: "cd ecommerce_api && gunicorn ecommerce_api.wsgi:application"
     envVars:
-      - key: DEBUG
-        value: "false"
+      - key: DJANGO_SETTINGS_MODULE
+        value: ecommerce_api.settings
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
