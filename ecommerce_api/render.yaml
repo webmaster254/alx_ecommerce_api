@@ -1,11 +1,10 @@
-# ecommerce_api/render.yaml
 services:
   - type: web
     name: alx-ecommerce-api
     env: python
     plan: free
-    buildCommand: "cd ecommerce_api && ./build.sh"
-    startCommand: "cd ecommerce_api && gunicorn ecommerce_api.wsgi:application"
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn ecommerce_api.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: ecommerce_api.settings
@@ -14,8 +13,9 @@ services:
       - key: WEB_CONCURRENCY
         value: "4"
       - key: PYTHON_VERSION
-        value: "3.9.13"
-    config:
-      python:
-        version: 3.9.13
-        installCommand: pip install -r requirements.txt
+        value: "3.11.0"
+      - key: PYTHONPATH
+        value: "."
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
