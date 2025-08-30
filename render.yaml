@@ -6,7 +6,7 @@ services:
     buildCommand: "./build.sh"
     startCommand: "python -m gunicorn ecommerce_api.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
     envVars:
-      - key: DATABASE_URL
+      - key: postgresql://ecommerce:NGIdPN3AxScjn6wAuLjNG9yftp9OdJvV@dpg-d2p96256ubrc73c2k0jg-a/ecommerce_446i
         fromDatabase:
           name: ecommerce
           property: connectionString
